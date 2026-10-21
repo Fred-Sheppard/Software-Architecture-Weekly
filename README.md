@@ -1,19 +1,43 @@
 # Software-Architecture-Weekly
 
-## Development Notes
+## Structure
 
-Before changing the program, the country-duration feature was placed in the
-existing data-processing loop because that is where each record's duration is
-already converted to hours. The JSON loading and duration conversion are
-reused. The plot's record collection, sorting, labels, output file, and
-display are left unchanged.
+The analysis lives in the `eva_analysis` package. Pure logic is separated from
+side effects, and dependencies point inward towards the domain model:
 
-The country total includes matching records with a duration even when they do
-not have a date. The plot still excludes those records because it needs a date
-for the x-axis. This separation prevents the new calculation from omitting
-valid EVA time while preserving the original plot behaviour.
+| Module | Responsibility |
+| --- | --- |
+| `models.py` | `Eva` dataclass and `DurationCategory` enum |
+| `parsing.py` | Raw JSON record to `Eva`, `"H:MM"` to hours |
+| `analysis.py` | Country totals, duration categories, cumulative series |
+| `repository.py` | Loading EVAs from the JSON file |
+| `reporting.py` | Text report and CSV output |
+| `plotting.py` | Cumulative duration chart |
+| `cli.py` | Argument parsing, prompting, and orchestration |
 
-Duration categories are also calculated during the existing duration conversion
-step. Every EVA with a duration is classified as Short (under 4 hours), Standard
-(4 hours up to 7 hours), or Long (7 hours or more), then reported as a count and
-percentage of classified EVAs.
+Records without a usable duration (missing or malformed) are dropped during
+parsing. As described above, undated records still count towards the country
+total and duration categories but are excluded from the cumulative plot. Each
+rule now lives in its own function in `analysis.py`.
+
+## Assessment
+
+The evaluation and documentation can be found in `docs/`.
+
+## Usage
+
+This project can be run using `uv`.
+
+```sh
+uv run python -m eva_analysis                      # prompts for a country
+uv run python -m eva_analysis --country USA --no-show
+uv run python -m eva_analysis --help
+uv run python -m eva_analysis compare              # prompts for countries and years
+uv run python -m eva_analysis compare --country-a USA --country-b Russia --start-year 1990 --end-year 2000
+```
+
+## Tests
+
+```sh
+uv run pytest
+```
