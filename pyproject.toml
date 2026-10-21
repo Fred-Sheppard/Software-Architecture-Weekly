@@ -1,0 +1,15 @@
+[project]
+name = "eva-analysis"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["matplotlib"]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

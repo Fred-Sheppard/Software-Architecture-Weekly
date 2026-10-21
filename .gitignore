@@ -1,3 +1,4 @@
 cumulative_duration.png
 country_statistics.csv
 __pycache__/
+.venv/
